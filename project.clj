@@ -6,5 +6,7 @@
   :main ^:skip-aot feedbin.core
   :dependencies [[org.clojure/clojure "1.10.1"]
     [cheshire "5.10.0"]
+    [debugger "0.2.1"]
+    [clj-time "0.15.2"]
     [clj-http "3.10.0"]]
   :repl-options {:init-ns feedbin.core})
