@@ -19,8 +19,14 @@
 ; DELETE /v2/updated_entries.json "updated_entries": [1,2,3]
 
 (defn -main []
-  (let [feedbin_auth (System/getenv "FEEDBIN_AUTH") feedbin_base_url "https://api.feedbin.com/"]
-    (def unread-entries (json/parse-string (:body (client/get (str feedbin_base_url "v2/unread_entries.json") {:basic-auth feedbin_auth}))))
-  )
+  ; The API uses HTTP basic auth. FEEDBIN_AUTH should be "email:password"
+  (def feedbin-auth (System/getenv "FEEDBIN_AUTH"))
+  (def feedbin-base-url "https://api.feedbin.com/")
+
+  ; Get all unread entries
+  ; https://github.com/feedbin/feedbin-api/blob/master/content/unread-entries.md
+  (def unread-entries (json/parse-string (:body
+    (client/get (str feedbin-base-url "v2/unread_entries.json") {:basic-auth feedbin-auth}))))
+
   (println unread-entries)
 )
