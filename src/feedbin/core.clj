@@ -17,4 +17,8 @@
 ; https://github.com/feedbin/feedbin-api/blob/master/content/updated-entries.md#delete-updated-entries-mark-as-read
 ; DELETE /v2/updated_entries.json "updated_entries": [1,2,3]
 
-(defn -main [] (println "Hello World"))
+(defn -main []
+  ; ((client/get "https://api.feedbin.com" {:basic-auth "user:pass"}))
+  (let [feedbin_auth (System/getenv "FEEDBIN_AUTH")]
+    (println feedbin_auth))
+  )
