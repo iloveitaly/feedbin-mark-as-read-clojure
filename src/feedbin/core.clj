@@ -1,5 +1,6 @@
 (ns feedbin.core
-  (:require [clj-http.client :as client]))
+  (:require [clj-http.client :as client]
+            [cheshire.core :as json]))
 
 ; The API uses HTTP basic auth. We'll need the username & password defined in a variable here
 
@@ -18,7 +19,8 @@
 ; DELETE /v2/updated_entries.json "updated_entries": [1,2,3]
 
 (defn -main []
-  ; ((client/get "https://api.feedbin.com" {:basic-auth "user:pass"}))
-  (let [feedbin_auth (System/getenv "FEEDBIN_AUTH")]
-    (println feedbin_auth))
+  (let [feedbin_auth (System/getenv "FEEDBIN_AUTH") feedbin_base_url "https://api.feedbin.com/"]
+    (def unread-entries (json/parse-string (:body (client/get (str feedbin_base_url "v2/unread_entries.json") {:basic-auth feedbin_auth}))))
   )
+  (println unread-entries)
+)
