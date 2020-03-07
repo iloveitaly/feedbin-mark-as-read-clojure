@@ -1,15 +1,11 @@
 (ns feedbin.core
   (:require [clj-http.client :as client]
             [clj-time.format]
+            [clojure.string :as str]
             [clj-time.core :refer [months ago before?]]
             [cheshire.core :as json]))
 
 (use 'debugger.core)
-
-; Filter list by all entries that are older than 2w
-; since we'll just have the IDs, we'll want to pull each entry individually
-; https://github.com/feedbin/feedbin-api/blob/master/content/entries.md
-; GET /v2/entries.json?ids=4088,4089,4090,4091
 
 ; Now that we have a list of all entries that should be marked as read, let's
 ; mark each of them as unread
@@ -30,7 +26,12 @@
     (clj-time.format/parse (clj-time.format/formatters :date-time) (entry "published"))
     (-> 1 months ago)))
 
-(defn mark-as-read [entry-ids])
+(defn mark-as-read [entry-ids]
+  ; let's mark each of the entries as read
+  ; https://github.com/feedbin/feedbin-api/blob/master/content/updated-entries.md#delete-updated-entries-mark-as-read
+  (client/delete
+    (str feedbin-base-url "v2/updated_entries.json?updated_entries=" (str/join "," entry-ids))
+    {:basic-auth feedbin-auth}))
 
 (defn -main []
   ; Get all unread entries
@@ -38,7 +39,5 @@
   (def unread-entries (json/parse-string (:body
     (client/get (str feedbin-base-url "v2/unread_entries.json") {:basic-auth feedbin-auth}))))
 
-  (println
-    (mark-as-read (filter one-month-old? unread-entries))
-  )
+  (mark-as-read (filter one-month-old? (take 50 unread-entries)))
 )
