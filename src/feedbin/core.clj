@@ -22,16 +22,23 @@
     (json/parse-string (:body
       (client/get (str feedbin-base-url "v2/entries/" entry-id ".json") {:basic-auth feedbin-auth}))))
 
-  (before?
-    (clj-time.format/parse (clj-time.format/formatters :date-time) (entry "published"))
-    (-> 1 months ago)))
+  (if
+    (before?
+      (clj-time.format/parse (clj-time.format/formatters :date-time) (entry "published"))
+      (-> 1 months ago))
+    (do
+      (println (entry "url"))
+      true
+    )
+    false))
 
 (defn mark-as-read [entry-ids]
   ; let's mark each of the entries as read
   ; https://github.com/feedbin/feedbin-api/blob/master/content/updated-entries.md#delete-updated-entries-mark-as-read
+  (break true)
   (client/delete
-    (str feedbin-base-url "v2/updated_entries.json?updated_entries=" (str/join "," entry-ids))
-    {:basic-auth feedbin-auth}))
+    (str feedbin-base-url "v2/updated_entries.json")
+    {:basic-auth feedbin-auth :debug true :debug-body true :form-params {:updated_entries entry-ids} :content-type :json }))
 
 (defn -main []
   ; Get all unread entries
@@ -39,5 +46,5 @@
   (def unread-entries (json/parse-string (:body
     (client/get (str feedbin-base-url "v2/unread_entries.json") {:basic-auth feedbin-auth}))))
 
-  (mark-as-read (filter one-month-old? (take 50 unread-entries)))
+  (mark-as-read (filter one-month-old? (take 10 unread-entries)))
 )
