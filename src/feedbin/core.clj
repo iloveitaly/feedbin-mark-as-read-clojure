@@ -1,4 +1,7 @@
 (ns feedbin.core
+  (:gen-class
+      :implements [com.amazonaws.services.lambda.runtime.RequestHandler]
+      :methods [^:static [handler [Object com.amazonaws.services.lambda.runtime.Context] String]])
   (:require [clj-http.client :as client]
             [clj-time.format]
             [clojure.string :as str]
@@ -6,11 +9,6 @@
             [cheshire.core :as json]))
 
 (use 'debugger.core)
-
-; Now that we have a list of all entries that should be marked as read, let's
-; mark each of them as unread
-; https://github.com/feedbin/feedbin-api/blob/master/content/updated-entries.md#delete-updated-entries-mark-as-read
-; DELETE /v2/updated_entries.json "updated_entries": [1,2,3]
 
 ; The API uses HTTP basic auth. FEEDBIN_AUTH should be "email:password"
 (def feedbin-auth (System/getenv "FEEDBIN_AUTH"))
@@ -33,7 +31,7 @@
     false))
 
 (defn mark-as-read [entry-ids]
-  ; let's mark each of the entries as read
+  ; let's mark each of the entries as read, which essentially deletes them
   ; https://github.com/feedbin/feedbin-api/blob/master/content/updated-entries.md#delete-updated-entries-mark-as-read
   (client/delete
     (str feedbin-base-url "v2/unread_entries.json")
@@ -47,3 +45,7 @@
 
   (mark-as-read (filter one-month-old? (take 50 unread-entries)))
 )
+
+(defn -handler [o s]
+  (-main)
+  (println "feeds updated"))
